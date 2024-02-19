@@ -5,23 +5,24 @@ import { createEmptyContact, getContacts } from "./data";
 
 import {
   Form,
-  Link,
   Links,
   LiveReload,
   Meta,
+  NavLink,
   Outlet,
   Scripts,
   ScrollRestoration,
   useLoaderData,
+  useNavigation,
 } from "@remix-run/react";
 
-export const links:LinksFunction = () => [
-  {rel:"stylesheet", href:appStyleHref},
+export const links: LinksFunction = () => [
+  { rel: "stylesheet", href: appStyleHref },
 ]
 
 export const loader = async () => {
   const contacts = await getContacts();
-  return json({contacts})
+  return json({ contacts })
 }
 
 export const action = async () => {
@@ -31,6 +32,7 @@ export const action = async () => {
 
 export default function App() {
   const { contacts } = useLoaderData<typeof loader>();
+  const navigation = useNavigation();
 
   return (
     <html lang="en">
@@ -63,7 +65,16 @@ export default function App() {
               <ul>
                 {contacts.map((contact) => (
                   <li key={contact.id}>
-                    <Link to={`contacts/${contact.id}`}>
+                    <NavLink
+                      className={({ isActive, isPending }) =>
+                        isActive ?
+                          "active"
+                          : isPending
+                            ? "pending"
+                            : ""
+                      }
+                      to={`contacts/${contact.id}`}
+                    >
                       {contact.first || contact.last ? (
                         <>
                           {contact.first} {contact.last}
@@ -74,18 +85,23 @@ export default function App() {
                       {contact.favorite ? (
                         <span>★</span>
                       ) : null}
-                    </Link>
+                    </NavLink>
                   </li>
                 ))}
               </ul>
-            ):(
+            ) : (
               <p>
                 <i>No contacts</i>
               </p>
             )}
           </nav>
         </div>
-        <div id="detail">
+        <div
+          className={
+            navigation.state === "loading" ? "loading" : ""
+          }
+          id="detail"
+        >
           <Outlet />
         </div>
         <ScrollRestoration />
