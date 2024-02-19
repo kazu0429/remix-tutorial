@@ -1,6 +1,6 @@
 import type { LoaderFunctionArgs } from "@remix-run/node";
 import invariant from "tiny-invariant";
-import { Form } from "@remix-run/react";
+import { Form, useLoaderData } from "@remix-run/react";
 import { json } from "@remix-run/node";
 import type { FunctionComponent } from "react";
 
@@ -9,6 +9,7 @@ import { getContact, type ContactRecord } from "~/data";
 export const loader = async ({
     params,
 }:LoaderFunctionArgs) => {
+    // inbariant:値がtrueの場合は何もせず、falseの場合は第二引数に渡した値をエラーメッセージとした例外を発生
     invariant(params.contactId, "Missing contactId param");
     const contact = await getContact(params.contactId);
     if(!contact){
@@ -18,14 +19,7 @@ export const loader = async ({
 }
 
 export default function Contact() {
-    const contact = {
-        first: "Your",
-        last: "Name",
-        avatar: "https://placekitten.com/g/200/200",
-        twitter: "your_handle",
-        notes: "Some notes",
-        favorite: true,
-    };
+    const { contact } = useLoaderData<typeof loader>();
 
     return (
         <div id="contact">
